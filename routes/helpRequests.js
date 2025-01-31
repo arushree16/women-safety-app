@@ -2,20 +2,26 @@ const express = require('express');
 const router = express.Router();
 const HelpRequest = require('../models/HelpRequest');
 const validateDBConnection = require('../middleware/validateDBConnection');
+const mongoose = require('mongoose');
 
 // Submit a help request
 router.post('/help-request', async (req, res) => {
   try {
     const { latitude, longitude, description } = req.body;
     
+    // Get current time with timezone offset
+    const currentTime = new Date();
+    const offset = currentTime.getTimezoneOffset();
+    currentTime.setMinutes(currentTime.getMinutes() - offset);
+    
     const helpRequest = new HelpRequest({
       location: {
         type: 'Point',
         coordinates: [longitude, latitude]
       },
-      timestamp: new Date(),
+      timestamp: currentTime,
       description,
-      userId: req.user._id // Assuming you have authentication middleware
+      userId: new mongoose.Types.ObjectId()
     });
     
     await helpRequest.save();
