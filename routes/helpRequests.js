@@ -9,10 +9,11 @@ router.post('/help-request', async (req, res) => {
   try {
     const { latitude, longitude, description } = req.body;
     
-    // Get current time with timezone offset
+    // Get current time in IST (UTC+5:30)
     const currentTime = new Date();
-    const offset = currentTime.getTimezoneOffset();
-    currentTime.setMinutes(currentTime.getMinutes() - offset);
+    // Add 5 hours and 30 minutes for IST
+    currentTime.setHours(currentTime.getHours() + 5);
+    currentTime.setMinutes(currentTime.getMinutes() + 30);
     
     const helpRequest = new HelpRequest({
       location: {
@@ -36,8 +37,11 @@ router.get('/check-safety', async (req, res) => {
   try {
     const { latitude, longitude, timeWindow = 24 } = req.query;
     
-    // Get current time and time 24 hours ago (or specified timeWindow)
+    // Get current time in IST
     const currentTime = new Date();
+    currentTime.setHours(currentTime.getHours() + 5);
+    currentTime.setMinutes(currentTime.getMinutes() + 30);
+    
     const timeThreshold = new Date(currentTime.getTime() - (timeWindow * 60 * 60 * 1000));
     
     // Find incidents within 500 meters and within time window
@@ -71,9 +75,11 @@ router.get('/check-safety-time', async (req, res) => {
   try {
     const { latitude, longitude, hour } = req.query;
     
-    // Get current date
+    // Get current date in IST
     const now = new Date();
-    // Set the hour from query
+    now.setHours(now.getHours() + 5);
+    now.setMinutes(now.getMinutes() + 30);
+    // Set the specific hour
     now.setHours(parseInt(hour), 0, 0, 0);
     
     // Look for incidents within +/- 1 hour of specified time
